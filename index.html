@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1F3864">
+<title>Gym Dashboard — Christos &amp; Maria</title>
+<style>
+  :root{
+    --navy:#1F3864; --his:#1F4E79; --his-soft:#DDEBF7; --her:#7B2D5E; --her-soft:#F3E1EC;
+    --accent:#1F4E79; --accent-soft:#DDEBF7;
+    --bg:#f4f5f7; --card:#ffffff; --ink:#1a1d24; --muted:#6b7280; --line:#e5e7eb; --good:#2E7D32;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1216; --card:#191d24; --ink:#eceef2; --muted:#9aa2af; --line:#2a2f38; --his-soft:#16324d; --her-soft:#3a1c30; }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.4; padding-bottom:96px;}
+  .wrap{max-width:520px; margin:0 auto;}
+  header{position:sticky; top:0; z-index:20; background:var(--accent); color:#fff; padding:10px 14px 12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.15); transition:background .2s;}
+  .htop{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .htitle{font-size:15px; font-weight:700; letter-spacing:.2px;}
+  .htitle small{display:block; font-weight:500; opacity:.85; font-size:11px; letter-spacing:0;}
+  .seg{display:flex; background:rgba(255,255,255,.16); border-radius:10px; padding:3px; gap:2px;}
+  .seg button{flex:1; border:0; background:transparent; color:#fff; font-weight:600; font-size:13px;
+    padding:7px 10px; border-radius:8px; cursor:pointer; opacity:.8; transition:.15s;}
+  .seg button.on{background:#fff; color:var(--accent); opacity:1;}
+  .row2{display:flex; gap:8px; margin-top:9px;}
+  .row2 .seg{flex:1;}
+  .days{display:flex; gap:7px; overflow-x:auto; padding:11px 14px 4px; -webkit-overflow-scrolling:touch;}
+  .days::-webkit-scrollbar{display:none;}
+  .daybtn{flex:0 0 auto; border:1.5px solid var(--line); background:var(--card); color:var(--ink);
+    border-radius:11px; padding:8px 13px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; min-width:64px; text-align:center;}
+  .daybtn small{display:block; font-weight:500; color:var(--muted); font-size:10.5px; margin-top:1px;}
+  .daybtn.on{border-color:var(--accent); background:var(--accent-soft);}
+  .daybtn.on small{color:var(--accent);}
+  .prog{padding:8px 14px 2px;}
+  .bar{height:8px; background:var(--line); border-radius:99px; overflow:hidden;}
+  .bar > i{display:block; height:100%; width:0; background:var(--good); transition:width .3s;}
+  .prog p{margin:5px 2px 0; font-size:11.5px; color:var(--muted); display:flex; justify-content:space-between;}
+  .banner{margin:8px 14px 0; background:var(--accent-soft); border-left:4px solid var(--accent);
+    border-radius:8px; padding:9px 11px; font-size:11.5px; color:var(--ink);}
+  main{padding:6px 14px 10px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:13px 13px 11px; margin-top:11px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .card.done{opacity:.62;}
+  .cname{font-size:15.5px; font-weight:700; margin:0 0 8px; display:flex; align-items:center; gap:7px;}
+  .cmeta{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px;}
+  .chip{font-size:12px; font-weight:600; padding:4px 9px; border-radius:8px; background:var(--accent-soft); color:var(--accent);}
+  .chip.ghost{background:transparent; border:1px solid var(--line); color:var(--muted); cursor:pointer;}
+  .wt{display:flex; align-items:center; gap:8px; margin-bottom:11px;}
+  .wt label{font-size:12.5px; color:var(--muted); font-weight:600;}
+  .wt input{width:78px; font-size:16px; font-weight:700; text-align:center; padding:7px 6px; border:1.5px solid var(--line);
+    border-radius:9px; background:var(--bg); color:var(--ink);}
+  .wt .unit{font-size:12.5px; color:var(--muted);}
+  .wt .hint{font-size:10.5px; color:var(--muted); margin-left:auto; text-align:right;}
+  .sets{display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px;}
+  .dot{width:42px; height:42px; border-radius:12px; border:2px solid var(--line); background:var(--bg);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:var(--muted); cursor:pointer; user-select:none; transition:.12s;}
+  .dot.on{background:var(--accent); border-color:var(--accent); color:#fff; transform:scale(1.04);}
+  .note{font-size:11.5px; color:var(--muted); margin:2px 0 0;}
+  .cheat{margin:16px 14px 0; background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .cheat > button{width:100%; text-align:left; border:0; background:transparent; color:var(--ink); font-weight:700;
+    font-size:14px; padding:13px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+  .cheat .body{padding:0 14px 13px; font-size:12.5px; color:var(--ink); display:none;}
+  .cheat.open .body{display:block;}
+  .cheat h4{margin:10px 0 4px; font-size:12.5px; color:var(--accent);}
+  .cheat p{margin:3px 0; color:var(--muted);}
+  .foot{padding:14px; font-size:10.5px; color:var(--muted); text-align:center;}
+  .actions{padding:2px 14px 0;}
+  .reset{width:100%; border:1px dashed var(--line); background:transparent; color:var(--muted); font-weight:600;
+    font-size:12.5px; padding:9px; border-radius:10px; cursor:pointer;}
+  /* rest timer */
+  #timer{position:fixed; left:0; right:0; bottom:0; z-index:40; transform:translateY(120%); transition:transform .25s;}
+  #timer.show{transform:translateY(0);}
+  #timer .inner{max-width:520px; margin:0 auto; background:var(--navy); color:#fff; padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    display:flex; align-items:center; gap:14px; box-shadow:0 -3px 14px rgba(0,0,0,.25);}
+  #timer .tt{font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; min-width:78px;}
+  #timer .tbar{flex:1; height:8px; background:rgba(255,255,255,.22); border-radius:99px; overflow:hidden;}
+  #timer .tbar > i{display:block; height:100%; width:100%; background:#7fd18a;}
+  #timer .tlab{font-size:11px; opacity:.85;}
+  #timer button{border:0; background:rgba(255,255,255,.2); color:#fff; font-weight:700; font-size:13px; padding:9px 13px; border-radius:9px; cursor:pointer;}
+  #timer .add{background:rgba(255,255,255,.14);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header id="hd">
+    <div class="htop">
+      <div class="htitle">12-Month Plan <small id="subttl">Tap a set to tick it off · weights save automatically</small></div>
+    </div>
+    <div class="seg" id="personSeg" style="margin-top:10px;">
+      <button data-person="christos" class="on">Christos</button>
+      <button data-person="wife">Maria</button>
+    </div>
+    <div class="row2">
+      <div class="seg" id="progSeg">
+        <button data-prog="4-Day" class="on">4-Day</button>
+        <button data-prog="3-Day">3-Day</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="days" id="days"></div>
+  <div class="banner" id="banner"></div>
+  <div class="prog">
+    <div class="bar"><i id="barFill"></i></div>
+    <p><span id="progTxt">0 of 0 sets done</span><span id="dayTitle"></span></p>
+  </div>
+
+  <main id="list"></main>
+
+  <div class="actions"><button class="reset" id="resetBtn">↺ Reset today's ticks (keeps your weights)</button></div>
+
+  <div class="cheat" id="cheat">
+    <button id="cheatBtn">Quick reference — progression, nutrition &amp; supplements <span>＋</span></button>
+    <div class="body" id="cheatBody"></div>
+  </div>
+
+  <div class="foot">General information, not medical advice. Start each lift so the first set leaves ~3–4 reps in the tank.<br>Companion to your Excel workbook &amp; PDF guide.</div>
+</div>
+
+<div id="timer">
+  <div class="inner">
+    <div class="tt" id="tt">1:30</div>
+    <div style="flex:1;">
+      <div class="tbar"><i id="tbar"></i></div>
+      <div class="tlab" id="tlab">Rest</div>
+    </div>
+    <button class="add" id="tAdd">+15s</button>
+    <button id="tSkip">Done</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------- resilient storage (works in a normal browser; degrades gracefully) ---------- */
+var mem={};
+var store={
+  get:function(k,d){ try{var v=localStorage.getItem(k); return v===null?d:JSON.parse(v);}catch(e){ return (k in mem)?mem[k]:d; } },
+  set:function(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){ mem[k]=v; } }
+};
+
+/* ---------- program data (mirrors your workbook) ---------- */
+var DATA={
+  christos:{ name:"Christos", accent:"#1F4E79", soft:"#DDEBF7",
+    banner:"Returner mode: add weight almost every week — +2.5 kg upper · +5 kg squat/deadlift/leg-press · +1.25–2.5 kg overhead. Stall 3 sessions in a row → drop 10% and climb again.",
+    programs:{
+     "4-Day":[
+      {t:"Day 1 · Upper (strength)", x:[
+        ["Barbell Bench Press",4,"5–8","50","2–3 min","Main lift — you'll reclaim 70 kg fast. Swap: DB bench"],
+        ["Barbell Row",4,"6–10","50","2 min","Swap: chest-supported row"],
+        ["Overhead Press",3,"6–10","30","2 min","Weakest lift — micro-load"],
+        ["Lat Pulldown / Pull-up",3,"8–12","55","90 s","Weighted pull-ups when easy"],
+        ["DB Lateral Raise",3,"12–20","8","60 s","Per hand"],
+        ["Triceps Rope Pushdown",3,"10–15","25","60 s",""],
+        ["Cable Crunch",3,"10–15","30","60 s","Abs — add weight over time"]]},
+      {t:"Day 2 · Lower (squat)", x:[
+        ["Back Squat",4,"5–8","60","2–3 min","Swap: hack squat"],
+        ["Romanian Deadlift",3,"8–12","60","2 min","Feel hamstrings/glutes"],
+        ["Leg Press",3,"10–15","120","90 s",""],
+        ["Seated Leg Curl",3,"10–15","40","90 s",""],
+        ["Standing Calf Raise",4,"8–15","60","60 s","Full stretch"],
+        ["Hanging Leg Raise",3,"10–20","BW","60 s","Abs — add a DB when 20 is easy"]]},
+      {t:"Day 3 · Upper (hypertrophy)", x:[
+        ["Incline DB Press",4,"8–12","20","90 s","Per hand"],
+        ["Chest-Supported Row",4,"10–15","24","90 s","Per hand / machine"],
+        ["Chin-up (assisted if needed)",3,"8–12","BW","90 s",""],
+        ["DB Shoulder Press",3,"8–12","16","90 s","Per hand"],
+        ["Cable Lateral Raise",3,"15–20","7","45 s",""],
+        ["Incline DB Curl",3,"10–15","12","60 s","Per hand"],
+        ["Overhead Triceps Extension",3,"10–15","20","60 s","Cable or DB"]]},
+      {t:"Day 4 · Lower (hinge)", x:[
+        ["Deadlift",4,"5–8","80","3 min","Swap: trap-bar deadlift"],
+        ["Bulgarian Split Squat",3,"8–12/leg","14","90 s","Per hand DBs"],
+        ["Barbell/DB Hip Thrust",3,"10–15","60","90 s","1s squeeze at top"],
+        ["Leg Extension",3,"12–20","40","60 s",""],
+        ["Seated Calf Raise",4,"12–20","30","45 s",""],
+        ["Ab Wheel / Weighted Plank",3,"8–15","BW","60 s","Abs"]]}
+     ],
+     "3-Day":[
+      {t:"Day A · Full body", x:[
+        ["Back Squat",3,"6–10","60","2–3 min",""],
+        ["Barbell Bench Press",3,"6–10","50","2 min",""],
+        ["Barbell Row",3,"8–12","50","90 s",""],
+        ["Seated Leg Curl",2,"10–15","40","90 s",""],
+        ["DB Lateral Raise",3,"12–20","8","60 s","Per hand"],
+        ["Triceps Pushdown",2,"10–15","25","60 s",""],
+        ["Cable Crunch",3,"10–15","30","60 s","Abs"]]},
+      {t:"Day B · Full body", x:[
+        ["Deadlift or Romanian Deadlift",3,"5–8","80","3 min",""],
+        ["Overhead Press",3,"6–10","30","2 min","Micro-load"],
+        ["Lat Pulldown / Pull-up",3,"8–12","55","90 s",""],
+        ["Leg Press",3,"12–15","120","90 s",""],
+        ["Incline DB Curl",3,"10–15","12","60 s","Per hand"],
+        ["DB Lateral Raise",3,"12–20","8","60 s","Per hand"],
+        ["Hanging Leg Raise",3,"10–20","BW","60 s","Abs"]]}
+     ]
+    }
+  },
+  wife:{ name:"Maria", accent:"#7B2D5E", soft:"#F3E1EC",
+    banner:"Add a little most weeks — +2.5–5 kg on hip thrust/squat/RDL, or +1 rep, then go up. Glutes love load + full stretch + a hard squeeze. Keep the deficit gentle; use the pool for cardio.",
+    programs:{
+     "4-Day":[
+      {t:"Day 1 · Lower (thrust & hinge)", x:[
+        ["Barbell Hip Thrust",4,"8–12","40","2 min","Incl. bar. 1s squeeze at top"],
+        ["Romanian Deadlift",3,"8–12","35","2 min","Hips back; feel glutes"],
+        ["Walking Lunge",3,"10–12/leg","8","90 s","Per hand DBs. Long stride = glute"],
+        ["Machine Hip Abduction",3,"15–20","40","60 s","Lean forward — upper glute"],
+        ["Standing Calf Raise",3,"12–20","30","45 s",""]]},
+      {t:"Day 2 · Upper", x:[
+        ["DB Shoulder Press",3,"8–12","9","90 s","Per hand"],
+        ["Lat Pulldown",3,"10–12","32","90 s",""],
+        ["DB Bench / Chest Press",3,"10–12","10","90 s","Per hand"],
+        ["Seated Cable Row",3,"10–12","32","90 s",""],
+        ["DB Lateral Raise",3,"12–20","5","45 s","Per hand"],
+        ["Band Hip Abduction",2,"20–30","band","30 s","Optional glute pump"]]},
+      {t:"Day 3 · Lower (squat & single-leg)", x:[
+        ["Back Squat / Smith Squat",4,"6–10","35","2 min","Sit back. Swap: goblet"],
+        ["Bulgarian Split Squat",3,"8–12/leg","8","90 s","Torso lean = glute"],
+        ["45° Back Extension (glute)",3,"12–15","BW","60 s","Round back, squeeze glutes"],
+        ["Cable Glute Kickback",3,"12–15/leg","12","45 s","1s squeeze"],
+        ["Machine Hip Abduction",3,"15–20","40","45 s",""]]},
+      {t:"Day 4 · Upper", x:[
+        ["Incline DB Press",3,"10–12","9","90 s","Per hand"],
+        ["Assisted Chin-up / Pulldown",3,"8–12","30","90 s",""],
+        ["Seated Shoulder Press",3,"10–12","25","90 s","Machine"],
+        ["Cable Row",3,"10–12","30","90 s",""],
+        ["DB Lateral Raise",3,"12–20","5","45 s","Per hand"],
+        ["Banded Hip Abduction",2,"20–30","band","30 s","Finisher"]]}
+     ],
+     "3-Day":[
+      {t:"Day A · Hip-thrust focus", x:[
+        ["Barbell Hip Thrust",4,"8–12","40","2 min","1s squeeze"],
+        ["Goblet Squat",3,"10–12","16","90 s",""],
+        ["DB Romanian Deadlift",3,"10–12","12","90 s","Per hand"],
+        ["DB Shoulder Press",3,"10–12","9","90 s","Per hand"],
+        ["Machine Hip Abduction",3,"15–20","40","45 s",""]]},
+      {t:"Day B · Hinge focus", x:[
+        ["Romanian Deadlift",4,"8–12","35","2 min","Hips back"],
+        ["Bulgarian Split Squat",3,"8–12/leg","8","90 s","Per hand"],
+        ["45° Back Extension (glute)",3,"12–15","BW","60 s","Add a plate when easy"],
+        ["Lat Pulldown",3,"10–12","32","90 s",""],
+        ["Cable Glute Kickback",3,"12–15/leg","12","45 s",""]]},
+      {t:"Day C · Mixed / single-leg", x:[
+        ["Hip Thrust (or single-leg)",3,"12–15","40","90 s",""],
+        ["Walking Lunge / Step-up",3,"10–12/leg","8","90 s","Per hand"],
+        ["Machine Hip Abduction",3,"15–20","40","45 s",""],
+        ["Seated Cable Row",3,"10–12","32","90 s",""],
+        ["Glute Bridge burnout",2,"20–30","BW","45 s",""]]}
+     ]
+    }
+  }
+};
+
+var CHEAT={
+  christos:[
+    ["How to progress","You're a returner — start at the shown weight and add load almost every week (+2.5 kg upper · +5 kg lower). Stall 3× → drop 10% and climb. Switch to 'add a rep then a little weight' only once that stops working."],
+    ["Nutrition (build)","~3,250 kcal/day · protein 150–210 g. Small surplus, gain ~0.25–0.4 kg/week. Mini-cut later for abs."],
+    ["Supplements","Whey to hit protein · creatine 3–5 g/day · vitamin D3 · coffee pre-workout. Optional extras are in your private PDF guide. Skip fat burners & 'size' pills."]],
+  wife:[
+    ["How to progress","Start at the shown weight, add a little most weeks (+2.5–5 kg or +1 rep). Full stretch + hard squeeze on glutes."],
+    ["Nutrition (fat loss)","~1,730 kcal/day · protein 136–163 g (aim high — helps at 42). Gentle deficit, ~0.5%/week. Whole-food protein first."],
+    ["Supplements","Whey · creatine 3–5 g/day (great for muscle + bone at 42) · vitamin D3 + calcium ~1,000 mg · coffee pre-workout. Skip fat burners, 'toning' & cellulite pills. Cellulite: fat loss + firmer legs soften it, nothing erases it."]]
+};
+
+/* ---------- state ---------- */
+var S={person:store.get("s_person","christos"), prog:store.get("s_prog","4-Day"), day:0};
+var el=function(id){return document.getElementById(id);};
+
+/* auto-reset ticks when the calendar day changes */
+(function(){ var t=new Date().toDateString(); if(store.get("s_lastDay","")!==t){ /* clear all chk: keys */
+  try{ for(var i=localStorage.length-1;i>=0;i--){var k=localStorage.key(i); if(k&&k.indexOf("chk:")===0) localStorage.removeItem(k);} }catch(e){ for(var m in mem){ if(m.indexOf("chk:")===0) delete mem[m]; } }
+  store.set("s_lastDay",t); } })();
+
+function accentApply(){
+  var d=DATA[S.person];
+  document.documentElement.style.setProperty("--accent", d.accent);
+  document.documentElement.style.setProperty("--accent-soft", d.soft);
+  el("hd").style.background=d.accent;
+  var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute("content", d.accent);
+}
+function days(){ return DATA[S.person].programs[S.prog]; }
+function ckey(){ return "chk:"+S.person+":"+S.prog+":"+S.day; }
+function wkey(i){ return "w:"+S.person+":"+S.prog+":"+S.day+":"+i; }
+
+function renderDays(){
+  var wrap=el("days"); wrap.innerHTML="";
+  days().forEach(function(d,i){
+    var b=document.createElement("button"); b.className="daybtn"+(i===S.day?" on":"");
+    var parts=d.t.split(" · ");
+    b.innerHTML="<span>"+parts[0]+"</span><small>"+(parts[1]||"")+"</small>";
+    b.onclick=function(){ S.day=i; renderDays(); renderList(); };
+    wrap.appendChild(b);
+  });
+}
+function renderList(){
+  var d=days()[S.day]; el("dayTitle").textContent=d.t;
+  el("banner").textContent=DATA[S.person].banner;
+  var checks=store.get(ckey(),{});
+  var list=el("list"); list.innerHTML="";
+  var totalSets=0, doneSets=0;
+  d.x.forEach(function(ex,i){
+    var name=ex[0], sets=ex[1], reps=ex[2], w=ex[3], rest=ex[4], note=ex[5];
+    totalSets+=sets;
+    var card=document.createElement("div"); card.className="card";
+    var savedW=store.get(wkey(i), w);
+    var isNum = !isNaN(parseFloat(savedW));
+    var html="";
+    html+='<div class="cname">'+name+'</div>';
+    html+='<div class="cmeta"><span class="chip">'+sets+' × '+reps+'</span>'
+        + '<span class="chip ghost" data-rest="'+rest+'">⏱ '+rest+'</span></div>';
+    html+='<div class="wt"><label>Weight</label>'
+        + '<input inputmode="decimal" data-i="'+i+'" value="'+savedW+'">'
+        + '<span class="unit">'+(isNum?'kg':'')+'</span>'
+        + '<span class="hint">start: '+w+(isNum?' kg':'')+'</span></div>';
+    html+='<div class="sets">';
+    for(var s=0;s<sets;s++){ var on=checks[i]&&checks[i][s]; if(on) doneSets++;
+      html+='<div class="dot'+(on?' on':'')+'" data-i="'+i+'" data-s="'+s+'">'+(s+1)+'</div>'; }
+    html+='</div>';
+    if(note) html+='<p class="note">'+note+'</p>';
+    card.innerHTML=html;
+    if(checks[i]&&checks[i].filter(Boolean).length===sets) card.className="card done";
+    list.appendChild(card);
+  });
+  // wire inputs
+  Array.prototype.forEach.call(list.querySelectorAll(".wt input"), function(inp){
+    inp.addEventListener("change", function(){ store.set(wkey(parseInt(inp.dataset.i,10)), inp.value.trim()); });
+  });
+  Array.prototype.forEach.call(list.querySelectorAll(".dot"), function(dot){
+    dot.addEventListener("click", function(){
+      var i=parseInt(dot.dataset.i,10), s=parseInt(dot.dataset.s,10);
+      var c=store.get(ckey(),{}); if(!c[i]) c[i]=[]; c[i][s]=!c[i][s]; store.set(ckey(),c);
+      if(c[i][s] && navigator.vibrate) try{navigator.vibrate(15);}catch(e){}
+      renderList();
+    });
+  });
+  Array.prototype.forEach.call(list.querySelectorAll(".chip.ghost"), function(ch){
+    ch.addEventListener("click", function(){ startTimer(ch.dataset.rest); });
+  });
+  el("progTxt").textContent=doneSets+" of "+totalSets+" sets done";
+  el("barFill").style.width=(totalSets? (doneSets/totalSets*100):0)+"%";
+}
+
+/* ---------- segmented controls ---------- */
+function wireSeg(segId, key, cb){
+  Array.prototype.forEach.call(el(segId).querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(el(segId).querySelectorAll("button"), function(x){x.classList.remove("on");});
+      b.classList.add("on"); cb(b.dataset[key]);
+    });
+  });
+}
+wireSeg("personSeg","person", function(v){ S.person=v; S.day=0; store.set("s_person",v); accentApply(); syncProgSeg(); renderDays(); renderList(); renderCheat(); });
+wireSeg("progSeg","prog", function(v){ S.prog=v; S.day=0; store.set("s_prog",v); renderDays(); renderList(); });
+function syncProgSeg(){ Array.prototype.forEach.call(el("progSeg").querySelectorAll("button"),function(b){ b.classList.toggle("on", b.dataset.prog===S.prog); }); }
+
+el("resetBtn").addEventListener("click", function(){ store.set(ckey(),{}); renderList(); });
+
+/* ---------- cheat sheet ---------- */
+function renderCheat(){
+  var rows=CHEAT[S.person], h="";
+  rows.forEach(function(r){ h+='<h4>'+r[0]+'</h4><p>'+r[1]+'</p>'; });
+  el("cheatBody").innerHTML=h;
+}
+el("cheatBtn").addEventListener("click", function(){ el("cheat").classList.toggle("open");
+  var s=el("cheatBtn").querySelector("span"); s.textContent=el("cheat").classList.contains("open")?"－":"＋"; });
+
+/* ---------- rest timer ---------- */
+var T={id:null,left:0,total:0};
+function parseRest(str){ if(!str) return 90; str=str.toLowerCase();
+  var n=parseInt((str.match(/\d+/)||[90])[0],10);
+  if(str.indexOf("min")>-1){ if(str.indexOf("2–3")>-1||str.indexOf("2-3")>-1) return 150; return n*60; }
+  return n; }
+function fmt(s){ var m=Math.floor(s/60); var r=s%60; return m+":"+(r<10?"0":"")+r; }
+function beep(){ try{ var a=new (window.AudioContext||window.webkitAudioContext)(); var o=a.createOscillator(); var g=a.createGain();
+  o.connect(g); g.connect(a.destination); o.frequency.value=880; o.type="sine"; g.gain.setValueAtTime(.001,a.currentTime);
+  g.gain.exponentialRampToValueAtTime(.3,a.currentTime+.02); g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.5);
+  o.start(); o.stop(a.currentTime+.5);}catch(e){} }
+function tick(){ T.left--; el("tt").textContent=fmt(Math.max(T.left,0)); el("tbar").style.width=(T.left/T.total*100)+"%";
+  if(T.left<=0){ clearInterval(T.id); T.id=null; beep(); if(navigator.vibrate) try{navigator.vibrate([120,60,120]);}catch(e){}
+    el("tt").textContent="Go!"; setTimeout(hideTimer,1500); } }
+function startTimer(rest){ var sec=parseRest(rest); T.left=sec; T.total=sec;
+  el("tt").textContent=fmt(sec); el("tbar").style.width="100%"; el("tlab").textContent="Rest — "+rest;
+  el("timer").classList.add("show"); if(T.id) clearInterval(T.id); T.id=setInterval(tick,1000); beep(); }
+function hideTimer(){ el("timer").classList.remove("show"); if(T.id){clearInterval(T.id);T.id=null;} }
+el("tSkip").addEventListener("click", hideTimer);
+el("tAdd").addEventListener("click", function(){ T.left+=15; T.total=Math.max(T.total,T.left); el("tt").textContent=fmt(T.left); });
+
+/* ---------- init ---------- */
+syncProgSeg();
+Array.prototype.forEach.call(el("personSeg").querySelectorAll("button"),function(b){ b.classList.toggle("on", b.dataset.person===S.person); });
+accentApply(); renderDays(); renderList(); renderCheat();
+</script>
+</body>
+</html>
